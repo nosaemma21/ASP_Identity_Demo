@@ -1,6 +1,9 @@
+using Identity.Api.Data;
 using Identity.Api.Entities;
 using Identity.Api.Extensions;
+using Identity.Api.Middlewares;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +11,15 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Host.UseSerilog();
 builder.Services.AddControllers();
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
+});
+builder
+    .Services.AddIdentity<AppUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
 
 //Adding jwt functionality
 builder.Services.AddJwtConfig(builder.Configuration);
@@ -20,6 +32,8 @@ builder
 Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
 
 var app = builder.Build();
+
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 //Adding roles
 using var scope = app.Services.CreateScope();
@@ -40,3 +54,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+//todo: Add registration, signin, email confirmation and jwt generation

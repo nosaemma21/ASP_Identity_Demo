@@ -1,4 +1,5 @@
 using System.Text;
+using Identity.Api.CustomErrors;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -27,7 +28,7 @@ public static class AddJwt
 
                 if (Issuer is null || Audience is null || Secret is null)
                 {
-                    throw new ApplicationException("Something is wrong in the JWT config");
+                    throw new JwtException("Something is wrong in the JWT config");
                 }
 
                 o.TokenValidationParameters = new TokenValidationParameters
